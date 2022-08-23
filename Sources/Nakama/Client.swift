@@ -585,7 +585,7 @@ public protocol Client {
      * @param session The session of the user.
      * @return A future to resolve an account object.
      */
-    //func getAccount( session : Session ) -> EventLoopFuture<Nakama_Api_Account>
+    func getAccount( session : Session ) -> EventLoopFuture<Nakama_Api_Account>
 
     /**
      * Fetch one or more users by id, usernames, and Facebook ids.

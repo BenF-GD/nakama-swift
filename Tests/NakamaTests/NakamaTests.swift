@@ -21,8 +21,9 @@ import Logging
 
 final class NakamaTests: XCTestCase {
     let logger = Logger(label: "nakama-test")
-    let client: Client = GrpcClient(serverKey: "defaultkey", trace: true)
+    let client: Client = GrpcClient(serverKey: "defaultkey", host: "nk1.awesome-golf.com", port: 7349, ssl:true, trace: true)
 
+    /*
     func newSession(id: String = "my-ios-device") -> Session {
         let sessionVars = ["hello":"world"]
         let session = try! client.authenticateDevice(id: id, create: true, username: nil, vars: sessionVars).wait()
@@ -42,16 +43,24 @@ final class NakamaTests: XCTestCase {
         XCTAssertNotEqual(session.token, "")
         logger.info("Created new session for user \(session.username) (\(session.userId)): \(session.token)")
     }
+    */
     
     func testSession() {
-        let session = newSession()
+        let session = try! client.authenticateEmail(email: "po.man@greatdetail.com", password: "testpassword").wait()
         XCTAssertFalse(session.expired)
         XCTAssertNotEqual(session.username, "")
         XCTAssertNotEqual(session.userId, "")
         XCTAssertNotEqual(session.token, "")
         logger.info("Created new session for user \(session.username) (\(session.userId)): \(session.token)")
+ 
+        let account = try! client.getAccount(session: session).wait()
+        XCTAssertNotEqual(account.user.id, "")
+        XCTAssertNotEqual(account.user.displayName, "")
+        XCTAssertNotEqual(account.user.metadata, "")
+        logger.info("Got user account \(account.user.id) \(account.user.displayName) \(account.user.metadata)")
     }
     
+    /*
     func testRealtimeChat() {
         let session1 = newSession()
         let session2 = newSession(id: "my-second-ios-device")
@@ -114,4 +123,5 @@ final class NakamaTests: XCTestCase {
         //XCTAssertNotEqual(socket1, )
         //
     }
+     */
 }

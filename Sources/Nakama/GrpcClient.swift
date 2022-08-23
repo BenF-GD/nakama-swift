@@ -74,6 +74,14 @@ public class GrpcClient : Client {
         }
     }
     
+    func mapAccount() -> (Nakama_Api_Account) -> EventLoopFuture<Nakama_Api_Account>{
+        return { (apiAccounts : Nakama_Api_Account) -> EventLoopFuture<Nakama_Api_Account> in
+            return self.eventLoopGroup.next().submit { () -> Nakama_Api_Account in
+                return apiAccounts
+            }
+        }
+    }
+    
     func mapUsers() -> (Nakama_Api_Users) -> EventLoopFuture<Nakama_Api_Users>{
         return { (apiUsers : Nakama_Api_Users) -> EventLoopFuture<Nakama_Api_Users> in
             return self.eventLoopGroup.next().submit { () -> Nakama_Api_Users in
@@ -600,10 +608,10 @@ public class GrpcClient : Client {
         
     }*/
     
-    /*public func getAccount(session: Session) -> EventLoopFuture<Nakama_Api_Account> {
-        var req = Nakama_Api_UpdateAccountRequest.init()
-        
-    }*/
+    public func getAccount(session: Session) -> EventLoopFuture<Nakama_Api_Account> {
+        let req = SwiftProtobuf.Google_Protobuf_Empty.init()
+        return self.nakamaGrpcClient.getAccount(req, callOptions: sessionCallOption(session: session)).response.flatMap( mapAccount() )
+    }
     
     public func getUsers(session: Session, ids: String...) -> EventLoopFuture<Nakama_Api_Users> {
         return self.getUsers(session: session, ids: ids, usernames: nil, facebookIds: nil)
@@ -631,7 +639,7 @@ public class GrpcClient : Client {
     public func importFacebookFriends(session: Session, token: String?, reset: Bool? ) -> EventLoopFuture<Void> {
         var req         = Nakama_Api_ImportFacebookFriendsRequest.init()
         req.account     = Nakama_Api_AccountFacebook.init()
-        if token != nil {
+        if token != nil {
             req.account.token = token!
         }
         //
@@ -643,7 +651,7 @@ public class GrpcClient : Client {
     }
     
     public func joinGroup(session: Session, groupId: String) -> EventLoopFuture<Void> {
-        var req = Nakama_Api_JoinGroupRequest.init()
+        let req = Nakama_Api_JoinGroupRequest.init()
         return self.nakamaGrpcClient.joinGroup(req, callOptions: sessionCallOption(session: session) ).response.flatMap( mapEmptyVoid() )
     }
     
